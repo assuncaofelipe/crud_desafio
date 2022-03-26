@@ -1,5 +1,6 @@
+import 'dart:ui';
 import 'package:test/expect.dart';
-
+import 'package:http/http.dart' as http;
 import 'utils/ClienteHelpers.dart';
 import 'package:crud_desafio/model/Cliente.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  String? resultadoCep;
   // variavel global para validação
   final formKey = GlobalKey<FormState>();
 
@@ -187,6 +189,7 @@ class _HomeState extends State<Home> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          insetPadding: EdgeInsets.zero,
           title: Text("$textoTitulo"),
 //-------------------------------------------------
 
@@ -212,9 +215,9 @@ class _HomeState extends State<Home> {
                         }
                       },
                       decoration: const InputDecoration(
-                        labelText: "Nome",
-                        hintText: "Exemplo: Felipe",
-                      ),
+                          labelText: "Nome",
+                          hintText: "Exemplo: Felipe",
+                          prefixIcon: Icon(Icons.perm_identity)),
                     ),
 
                     /** CAMPO DO TELEFONE */
@@ -222,15 +225,15 @@ class _HomeState extends State<Home> {
                       controller: txttelefone,
                       keyboardType: TextInputType.number,
                       autofocus: true,
+                      decoration: const InputDecoration(
+                          labelText: "Telefone",
+                          hintText: "Exemplo: (92) 9 9999-9999",
+                          prefixIcon: Icon(Icons.phone)),
                       validator: (String? value) {
                         if (value == null || value.isEmpty) {
                           return 'Campo obrigatório!';
                         }
                       },
-                      decoration: const InputDecoration(
-                        labelText: "Telefone",
-                        hintText: "Exemplo: (92) 9 9999-9999",
-                      ),
                     ),
 
                     /** CEP */
@@ -238,15 +241,16 @@ class _HomeState extends State<Home> {
                       controller: txtcep,
                       keyboardType: TextInputType.number,
                       autofocus: true,
+                      decoration: const InputDecoration(
+                          labelText: "CEP",
+                          hintText: "Exemplo: 69103108",
+                          suffixIcon: Icon(Icons.search),
+                          prefixIcon: Icon(Icons.add_location_rounded)),
                       validator: (String? value) {
                         if (value == null || value.isEmpty) {
                           return 'Campo obrigatório!';
                         }
                       },
-                      decoration: const InputDecoration(
-                        labelText: "CEP",
-                        hintText: "Exemplo: 69103108",
-                      ),
                     ),
 
                     /** CAMPO DO UF */
@@ -262,6 +266,7 @@ class _HomeState extends State<Home> {
                       decoration: const InputDecoration(
                         labelText: "UF",
                         hintText: "Exemplo: Amazonas",
+                        prefixIcon: Icon(Icons.home),
                       ),
                     ),
 
@@ -278,6 +283,7 @@ class _HomeState extends State<Home> {
                       decoration: const InputDecoration(
                         labelText: "Cidade",
                         hintText: "Exemplo: Itacoatiara",
+                        prefixIcon: Icon(Icons.location_city),
                       ),
                     ),
 
@@ -294,6 +300,7 @@ class _HomeState extends State<Home> {
                       decoration: const InputDecoration(
                         labelText: "Bairro",
                         hintText: "Exemplo: Tiradentes",
+                        prefixIcon: Icon(Icons.emoji_flags),
                       ),
                     ),
 
@@ -310,6 +317,7 @@ class _HomeState extends State<Home> {
                       decoration: const InputDecoration(
                         labelText: "Rua",
                         hintText: "Exemplo: Acácio Leite",
+                        prefixIcon: Icon(Icons.streetview),
                       ),
                     ),
 
@@ -326,6 +334,7 @@ class _HomeState extends State<Home> {
                       decoration: const InputDecoration(
                         labelText: "Nº da casa",
                         hintText: "Exemplo: Apt 42B5",
+                        prefixIcon: Icon(Icons.numbers),
                       ),
                     ),
                   ],
