@@ -1,3 +1,5 @@
+import 'package:test/expect.dart';
+
 import 'utils/ClienteHelpers.dart';
 import 'package:crud_desafio/model/Cliente.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +12,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  // variavel global para validação
+  final formKey = GlobalKey<FormState>();
+
   // CONTROLERS DOS CAMPOS DE TEXTO
   TextEditingController txtnome = TextEditingController();
   TextEditingController txttelefone = TextEditingController();
@@ -184,100 +189,148 @@ class _HomeState extends State<Home> {
         return AlertDialog(
           title: Text("$textoTitulo"),
 //-------------------------------------------------
+
           content: SingleChildScrollView(
-            child: Column(
-              // tamanho do forms no alert dialog
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                // -------------------------------------------------
-                /** CAMPO DO NOME */
-                TextField(
-                  controller: txtnome,
-                  keyboardType: TextInputType.text,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    labelText: "Nome",
-                    hintText: "Exemplo: Felipe",
-                  ),
-                ),
+            child: Center(
+              child: Form(
+                // variavel para validação de campos
+                key: formKey,
 
-                /** CAMPO DO TELEFONE */
-                TextField(
-                  controller: txttelefone,
-                  keyboardType: TextInputType.number,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    labelText: "Telefone",
-                    hintText: "Exemplo: (92) 9 9999-9999",
-                  ),
-                ),
+                child: Column(
+                  // tamanho do forms no alert dialog
+                  // mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    // -------------------------------------------------
+                    /** CAMPO DO NOME */
+                    TextFormField(
+                      controller: txtnome,
+                      keyboardType: TextInputType.text,
+                      autofocus: true,
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Campo obrigatório!';
+                        }
+                      },
+                      decoration: const InputDecoration(
+                        labelText: "Nome",
+                        hintText: "Exemplo: Felipe",
+                      ),
+                    ),
 
-                /** CEP */
-                TextField(
-                  controller: txtcep,
-                  keyboardType: TextInputType.number,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    labelText: "CEP",
-                    hintText: "Exemplo: 69103108",
-                  ),
-                ),
+                    /** CAMPO DO TELEFONE */
+                    TextFormField(
+                      controller: txttelefone,
+                      keyboardType: TextInputType.number,
+                      autofocus: true,
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Campo obrigatório!';
+                        }
+                      },
+                      decoration: const InputDecoration(
+                        labelText: "Telefone",
+                        hintText: "Exemplo: (92) 9 9999-9999",
+                      ),
+                    ),
 
-                /** CAMPO DO UF */
-                TextField(
-                  controller: txtuf,
-                  keyboardType: TextInputType.text,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    labelText: "UF",
-                    hintText: "Exemplo: Amazonas",
-                  ),
-                ),
+                    /** CEP */
+                    TextFormField(
+                      controller: txtcep,
+                      keyboardType: TextInputType.number,
+                      autofocus: true,
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Campo obrigatório!';
+                        }
+                      },
+                      decoration: const InputDecoration(
+                        labelText: "CEP",
+                        hintText: "Exemplo: 69103108",
+                      ),
+                    ),
 
-                /** CAMPO DO CIDADE */
-                TextField(
-                  controller: txtcidade,
-                  keyboardType: TextInputType.text,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    labelText: "Cidade",
-                    hintText: "Exemplo: Itacoatiara",
-                  ),
-                ),
+                    /** CAMPO DO UF */
+                    TextFormField(
+                      controller: txtuf,
+                      keyboardType: TextInputType.text,
+                      autofocus: true,
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Campo obrigatório!';
+                        }
+                      },
+                      decoration: const InputDecoration(
+                        labelText: "UF",
+                        hintText: "Exemplo: Amazonas",
+                      ),
+                    ),
 
-                /** CAMPO DO BAIRRO */
-                TextField(
-                  controller: txtbairro,
-                  keyboardType: TextInputType.text,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    labelText: "Bairro",
-                    hintText: "Exemplo: Tiradentes",
-                  ),
-                ),
+                    /** CAMPO DO CIDADE */
+                    TextFormField(
+                      controller: txtcidade,
+                      keyboardType: TextInputType.text,
+                      autofocus: true,
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Campo obrigatório!';
+                        }
+                      },
+                      decoration: const InputDecoration(
+                        labelText: "Cidade",
+                        hintText: "Exemplo: Itacoatiara",
+                      ),
+                    ),
 
-                /** CAMPO DO RUA */
-                TextField(
-                  controller: txtrua,
-                  keyboardType: TextInputType.text,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    labelText: "Rua",
-                    hintText: "Exemplo: Acácio Leite",
-                  ),
-                ),
+                    /** CAMPO DO BAIRRO */
+                    TextFormField(
+                      controller: txtbairro,
+                      keyboardType: TextInputType.text,
+                      autofocus: true,
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Campo obrigatório!';
+                        }
+                      },
+                      decoration: const InputDecoration(
+                        labelText: "Bairro",
+                        hintText: "Exemplo: Tiradentes",
+                      ),
+                    ),
 
-                /** CAMPO DO NUMERO DA CASA */
-                TextField(
-                  controller: txtnumerocasa,
-                  keyboardType: TextInputType.text,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    labelText: "Nº da casa",
-                    hintText: "Exemplo: Apt 42B5",
-                  ),
+                    /** CAMPO DO RUA */
+                    TextFormField(
+                      controller: txtrua,
+                      keyboardType: TextInputType.text,
+                      autofocus: true,
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Campo obrigatório!';
+                        }
+                      },
+                      decoration: const InputDecoration(
+                        labelText: "Rua",
+                        hintText: "Exemplo: Acácio Leite",
+                      ),
+                    ),
+
+                    /** CAMPO DO NUMERO DA CASA */
+                    TextFormField(
+                      controller: txtnumerocasa,
+                      keyboardType: TextInputType.text,
+                      autofocus: true,
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Campo obrigatório!';
+                        }
+                      },
+                      decoration: const InputDecoration(
+                        labelText: "Nº da casa",
+                        hintText: "Exemplo: Apt 42B5",
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
           actions: <Widget>[
@@ -293,6 +346,11 @@ class _HomeState extends State<Home> {
             TextButton(
               child: Text("$textobotao"),
               onPressed: () {
+                // chama a funcao para validar formulario
+                // valida o formulario mas ainda cria no banco de dados
+                formKey.currentState?.validate();
+
+                // chama a funcao para criar no banco
                 salvarCliente(clienteSelecionado: cliente);
                 Navigator.pop(context);
               },
