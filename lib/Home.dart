@@ -193,6 +193,7 @@ class _HomeState extends State<Home> {
                 /** CAMPO DO NOME */
                 TextField(
                   controller: txtnome,
+                  keyboardType: TextInputType.text,
                   autofocus: true,
                   decoration: const InputDecoration(
                     labelText: "Nome",
@@ -203,6 +204,7 @@ class _HomeState extends State<Home> {
                 /** CAMPO DO TELEFONE */
                 TextField(
                   controller: txttelefone,
+                  keyboardType: TextInputType.number,
                   autofocus: true,
                   decoration: const InputDecoration(
                     labelText: "Telefone",
@@ -213,6 +215,7 @@ class _HomeState extends State<Home> {
                 /** CEP */
                 TextField(
                   controller: txtcep,
+                  keyboardType: TextInputType.number,
                   autofocus: true,
                   decoration: const InputDecoration(
                     labelText: "CEP",
@@ -223,6 +226,7 @@ class _HomeState extends State<Home> {
                 /** CAMPO DO UF */
                 TextField(
                   controller: txtuf,
+                  keyboardType: TextInputType.text,
                   autofocus: true,
                   decoration: const InputDecoration(
                     labelText: "UF",
@@ -233,6 +237,7 @@ class _HomeState extends State<Home> {
                 /** CAMPO DO CIDADE */
                 TextField(
                   controller: txtcidade,
+                  keyboardType: TextInputType.text,
                   autofocus: true,
                   decoration: const InputDecoration(
                     labelText: "Cidade",
@@ -243,6 +248,7 @@ class _HomeState extends State<Home> {
                 /** CAMPO DO BAIRRO */
                 TextField(
                   controller: txtbairro,
+                  keyboardType: TextInputType.text,
                   autofocus: true,
                   decoration: const InputDecoration(
                     labelText: "Bairro",
@@ -253,6 +259,7 @@ class _HomeState extends State<Home> {
                 /** CAMPO DO RUA */
                 TextField(
                   controller: txtrua,
+                  keyboardType: TextInputType.text,
                   autofocus: true,
                   decoration: const InputDecoration(
                     labelText: "Rua",
@@ -263,9 +270,10 @@ class _HomeState extends State<Home> {
                 /** CAMPO DO NUMERO DA CASA */
                 TextField(
                   controller: txtnumerocasa,
+                  keyboardType: TextInputType.text,
                   autofocus: true,
                   decoration: const InputDecoration(
-                    labelText: "Residência",
+                    labelText: "Nº da casa",
                     hintText: "Exemplo: Apt 42B5",
                   ),
                 ),
