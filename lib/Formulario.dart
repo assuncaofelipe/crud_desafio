@@ -44,8 +44,6 @@ class _FormularioState extends State<Formulario> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                onPressed: (){}),
               _buildName(),
               const SizedBox(
                 height: 10,
@@ -95,10 +93,8 @@ class _FormularioState extends State<Formulario> {
     );
   }
 
-
   Widget _buildPhone() {
     return TextField(
-      textInputAction: ,
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
         TelefoneInputFormatter()
@@ -109,7 +105,6 @@ class _FormularioState extends State<Formulario> {
       ),
     );
   }
-
 
   Widget _buildConsultaCep() {
     return Row(
@@ -145,7 +140,6 @@ class _FormularioState extends State<Formulario> {
       ],
     );
   }
-
 
   Widget _buildEndereco() {
     return Column(
@@ -226,7 +220,6 @@ class _FormularioState extends State<Formulario> {
     );
   }
 
-
   consultaCep() async {
     // Variáveis que receberão os dados do WebService
     String cep = txtcep.text;
@@ -249,7 +242,6 @@ class _FormularioState extends State<Formulario> {
       print(resultado);
     });
   }
-
 
   //Implementando o metodo para salvar no bando de dados
   void salvarCliente() {
