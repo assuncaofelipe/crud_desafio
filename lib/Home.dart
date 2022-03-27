@@ -1,5 +1,5 @@
-import 'dart:ui';
-import 'package:test/expect.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'utils/ClienteHelpers.dart';
 import 'package:crud_desafio/model/Cliente.dart';
@@ -14,6 +14,10 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   String? resultadoCep;
+  String? resultadoCepCidade;
+  String? resultadoCepUf;
+  String? resultadoCepRua;
+  String? resultadoCepBairro;
   // variavel global para validação
   final formKey = GlobalKey<FormState>();
 
@@ -32,6 +36,34 @@ class _HomeState extends State<Home> {
 
   // O objeto que salvar no banco de dados
   final ClienteHelpers _db = ClienteHelpers();
+
+  // GET to CEP API
+  consultaCep() async {
+    // Variáveis que receberão os dados do WebService
+    String cep = txtcep.text;
+    String url = "https://viacep.com.br/ws/{$cep}/json/";
+    http.Response response;
+    response = await http.get(Uri.parse(url));
+
+    Map<String, dynamic> retorno = json.decode(response.body);
+
+    // variáveis recebendo os dados em JSON da API
+    String _cep = retorno["cep"];
+    String _uf = retorno["uf"];
+    String _cidade = retorno["localidade"];
+    String _bairro = retorno["bairro"];
+    String _rua = retorno["logradouro"];
+
+    setState(() {
+      resultadoCep = "Cidade: $_cep";
+      resultadoCepUf = "Cidade: $_uf";
+      resultadoCepCidade = "Cidade: $_cidade";
+      resultadoCepBairro = "Cidade: $_bairro";
+      resultadoCepRua = "Cidade: $_rua";
+
+      // print(resultadoCep);
+    });
+  }
 
   //Implementando o metodo para salvar no bando de dados
   void salvarCliente({Cliente? clienteSelecionado}) {
@@ -189,183 +221,56 @@ class _HomeState extends State<Home> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          insetPadding: EdgeInsets.zero,
-          title: Text("$textoTitulo"),
+            insetPadding: EdgeInsets.zero,
+            title: Text("$textoTitulo"),
 //-------------------------------------------------
 
-          content: SingleChildScrollView(
-            child: Center(
-              child: Form(
-                // variavel para validação de campos
-                key: formKey,
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildName(),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  _buildPhone(),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  _buildConsultaCep(),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  _buildEndereco(),
+                  const SizedBox(
+                    height: 60,
+                  ),
+                  /////////////
 
-                child: Column(
-                  // tamanho do forms no alert dialog
-                  // mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    // -------------------------------------------------
-                    /** CAMPO DO NOME */
-                    TextFormField(
-                      controller: txtnome,
-                      keyboardType: TextInputType.text,
-                      autofocus: true,
-                      validator: (String? value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Campo obrigatório!';
-                        }
-                      },
-                      decoration: const InputDecoration(
-                          labelText: "Nome",
-                          hintText: "Exemplo: Felipe",
-                          prefixIcon: Icon(Icons.perm_identity)),
-                    ),
+                  /////////
 
-                    /** CAMPO DO TELEFONE */
-                    TextFormField(
-                      controller: txttelefone,
-                      keyboardType: TextInputType.number,
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                          labelText: "Telefone",
-                          hintText: "Exemplo: (92) 9 9999-9999",
-                          prefixIcon: Icon(Icons.phone)),
-                      validator: (String? value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Campo obrigatório!';
-                        }
-                      },
+                  TextButton(
+                    child: const Text("Cancelar"),
+                    style: TextButton.styleFrom(
+                      primary: Colors.red, // background
                     ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  TextButton(
+                    child: Text("$textobotao"),
+                    onPressed: () {
+                      consultaCep();
+                      salvarCliente();
+                      Navigator.pop(context);
+                    },
+                  ),
 
-                    /** CEP */
-                    TextFormField(
-                      controller: txtcep,
-                      keyboardType: TextInputType.number,
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                          labelText: "CEP",
-                          hintText: "Exemplo: 69103108",
-                          suffixIcon: Icon(Icons.search),
-                          prefixIcon: Icon(Icons.add_location_rounded)),
-                      validator: (String? value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Campo obrigatório!';
-                        }
-                      },
-                    ),
-
-                    /** CAMPO DO UF */
-                    TextFormField(
-                      controller: txtuf,
-                      keyboardType: TextInputType.text,
-                      autofocus: true,
-                      validator: (String? value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Campo obrigatório!';
-                        }
-                      },
-                      decoration: const InputDecoration(
-                        labelText: "UF",
-                        hintText: "Exemplo: Amazonas",
-                        prefixIcon: Icon(Icons.home),
-                      ),
-                    ),
-
-                    /** CAMPO DO CIDADE */
-                    TextFormField(
-                      controller: txtcidade,
-                      keyboardType: TextInputType.text,
-                      autofocus: true,
-                      validator: (String? value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Campo obrigatório!';
-                        }
-                      },
-                      decoration: const InputDecoration(
-                        labelText: "Cidade",
-                        hintText: "Exemplo: Itacoatiara",
-                        prefixIcon: Icon(Icons.location_city),
-                      ),
-                    ),
-
-                    /** CAMPO DO BAIRRO */
-                    TextFormField(
-                      controller: txtbairro,
-                      keyboardType: TextInputType.text,
-                      autofocus: true,
-                      validator: (String? value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Campo obrigatório!';
-                        }
-                      },
-                      decoration: const InputDecoration(
-                        labelText: "Bairro",
-                        hintText: "Exemplo: Tiradentes",
-                        prefixIcon: Icon(Icons.emoji_flags),
-                      ),
-                    ),
-
-                    /** CAMPO DO RUA */
-                    TextFormField(
-                      controller: txtrua,
-                      keyboardType: TextInputType.text,
-                      autofocus: true,
-                      validator: (String? value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Campo obrigatório!';
-                        }
-                      },
-                      decoration: const InputDecoration(
-                        labelText: "Rua",
-                        hintText: "Exemplo: Acácio Leite",
-                        prefixIcon: Icon(Icons.streetview),
-                      ),
-                    ),
-
-                    /** CAMPO DO NUMERO DA CASA */
-                    TextFormField(
-                      controller: txtnumerocasa,
-                      keyboardType: TextInputType.text,
-                      autofocus: true,
-                      validator: (String? value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Campo obrigatório!';
-                        }
-                      },
-                      decoration: const InputDecoration(
-                        labelText: "Nº da casa",
-                        hintText: "Exemplo: Apt 42B5",
-                        prefixIcon: Icon(Icons.numbers),
-                      ),
-                    ),
-                  ],
-                ),
+                  ///////////////
+                ],
               ),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("Cancelar"),
-              style: TextButton.styleFrom(
-                primary: Colors.red, // background
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              child: Text("$textobotao"),
-              onPressed: () {
-                // chama a funcao para validar formulario
-                // valida o formulario mas ainda cria no banco de dados
-                formKey.currentState?.validate();
-
-                // chama a funcao para criar no banco
-                salvarCliente(clienteSelecionado: cliente);
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
+            ));
       },
     );
   }
@@ -438,6 +343,196 @@ class _HomeState extends State<Home> {
           exibirTelaCadastro();
         },
       ),
+    );
+  }
+
+  Widget _buildName() {
+    return TextField(
+      controller: txtnome,
+      decoration: const InputDecoration(
+        labelText: 'Nome',
+      ),
+    );
+  }
+
+  Widget _buildPhone() {
+    return TextField(
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        TelefoneInputFormatter()
+      ],
+      controller: txttelefone,
+      decoration: const InputDecoration(
+        labelText: 'Telefone*',
+      ),
+    );
+  }
+
+  Widget _buildConsultaCep() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Expanded(
+          child: TextField(
+            maxLength: 8,
+            controller: txtcep,
+            decoration: const InputDecoration(
+              counterText: "",
+              labelText: 'Digite o CEP',
+            ),
+            keyboardType: TextInputType.number,
+          ),
+        ),
+        const SizedBox(
+          width: 15,
+        ),
+        Container(
+          height: 40,
+          width: 60,
+          margin: const EdgeInsets.only(top: 20),
+          child: ElevatedButton(
+            child: const Icon(
+              Icons.search,
+              size: 30,
+            ),
+            onPressed: consultaCep,
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildEndereco() {
+    return Column(
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Cidade: ',
+                ),
+                controller: txtcidade,
+              ),
+            ),
+            const SizedBox(
+              width: 15,
+            ),
+            SizedBox(
+              width: 80,
+              child: TextField(
+                decoration: const InputDecoration(
+                  labelText: 'UF',
+                ),
+                controller: txtuf,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Rua',
+                ),
+                controller: txtrua,
+              ),
+            ),
+            const SizedBox(
+              width: 15,
+            ),
+            SizedBox(
+              width: 80,
+              child: TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Nº',
+                ),
+                controller: txtnumerocasa,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Bairro',
+                ),
+                controller: txtbairro,
+              ),
+            ),
+            const SizedBox(
+              width: 15,
+            ),
+          ],
+        )
+      ],
+    );
+  }
+}
+
+/// Formata o valor do campo com a máscara ( (99) 99999-9999 ).
+///
+/// Nono dígito automático.
+class TelefoneInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    final newValueLength = newValue.text.length;
+    var selectionIndex = newValue.selection.end;
+    var substrIndex = 0;
+    final newText = StringBuffer();
+
+    if (newValueLength == 11) {
+      if (newValue.text.toString()[2] != '9') {
+        return oldValue;
+      }
+    }
+
+    /// Verifica o tamanho máximo do campo.
+    if (newValueLength > 11) {
+      return oldValue;
+    }
+    if (newValueLength >= 1) {
+      newText.write('(');
+      if (newValue.selection.end >= 1) selectionIndex++;
+    }
+
+    if (newValueLength >= 3) {
+      newText.write(newValue.text.substring(0, substrIndex = 2) + ') ');
+      if (newValue.selection.end >= 2) selectionIndex += 2;
+    }
+
+    if (newValue.text.length == 11) {
+      if (newValueLength >= 8) {
+        newText.write(newValue.text.substring(2, substrIndex = 7) + '-');
+        if (newValue.selection.end >= 7) selectionIndex++;
+      }
+    } else {
+      if (newValueLength >= 7) {
+        newText.write(newValue.text.substring(2, substrIndex = 6) + '-');
+        if (newValue.selection.end >= 6) selectionIndex++;
+      }
+    }
+
+    if (newValueLength >= substrIndex) {
+      newText.write(newValue.text.substring(substrIndex));
+    }
+
+    return TextEditingValue(
+      text: newText.toString(),
+      selection: TextSelection.collapsed(offset: selectionIndex),
     );
   }
 }
