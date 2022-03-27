@@ -1,6 +1,7 @@
 import 'dart:convert';
+import 'package:crud_desafio/Formulario.dart';
+import 'package:crud_desafio/tratamentoTextTelefone.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'utils/ClienteHelpers.dart';
 import 'package:crud_desafio/model/Cliente.dart';
 import 'package:flutter/material.dart';
@@ -13,11 +14,13 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  String? resultadoCep;
-  String? resultadoCepCidade;
-  String? resultadoCepUf;
-  String? resultadoCepRua;
-  String? resultadoCepBairro;
+  @override
+  void initState() {
+    super.initState();
+    // chama o petodo para listar clientes
+    recuperarClientes();
+  }
+
   // variavel global para validação
   final formKey = GlobalKey<FormState>();
 
@@ -37,87 +40,70 @@ class _HomeState extends State<Home> {
   // O objeto que salvar no banco de dados
   final ClienteHelpers _db = ClienteHelpers();
 
-  // GET to CEP API
-  consultaCep() async {
-    // Variáveis que receberão os dados do WebService
-    String cep = txtcep.text;
-    String url = "https://viacep.com.br/ws/{$cep}/json/";
-    http.Response response;
-    response = await http.get(Uri.parse(url));
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Cadastro de clientes"),
+      ),
 
-    Map<String, dynamic> retorno = json.decode(response.body);
+      ///---------------------------------------------------
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: ListView.builder(
+                itemCount: listadeClientes.length,
+                itemBuilder: (context, index) {
+                  final Cliente obj = listadeClientes[index];
 
-    // variáveis recebendo os dados em JSON da API
-    String _cep = retorno["cep"];
-    String _uf = retorno["uf"];
-    String _cidade = retorno["localidade"];
-    String _bairro = retorno["bairro"];
-    String _rua = retorno["logradouro"];
-
-    setState(() {
-      resultadoCep = "Cidade: $_cep";
-      resultadoCepUf = "Cidade: $_uf";
-      resultadoCepCidade = "Cidade: $_cidade";
-      resultadoCepBairro = "Cidade: $_bairro";
-      resultadoCepRua = "Cidade: $_rua";
-
-      // print(resultadoCep);
-    });
-  }
-
-  //Implementando o metodo para salvar no bando de dados
-  void salvarCliente({Cliente? clienteSelecionado}) {
-    setState(() async {
-      // verifica se o clienteSelecionado eh null ou nao
-      // esta cadastrando um contato novo
-      if (clienteSelecionado == null) {
-        // passo 1 - criar um obj da classe contato para guardar as informações
-        Cliente obj = Cliente(
-            null,
-            txtnome.text,
-            txttelefone.text,
-            txtcep.text,
-            txtuf.text,
-            txtcidade.text,
-            txtbairro.text,
-            txtrua.text,
-            txtnumerocasa.text);
-
-        int resultado = await _db.inserirCliente(obj);
-
-        if (resultado != null) {
-          print("Cadastrado com sucesso!" + resultado.toString());
-        } else {
-          print("Erro ao cadastrar!");
-        }
-      }
-      // caso o obj clienteSelecionado esteja com dados
-      // significa que esta alterando um contato existente
-      else {
-        // 1 passo eh armazenar os dados dos campos de texto e salvar
-        // no objeto um clienteSelecionado existente
-        clienteSelecionado.nome = txtnome.text;
-        clienteSelecionado.telefone = txttelefone.text;
-        clienteSelecionado.cep = txtcep.text;
-        clienteSelecionado.uf = txtuf.text;
-        clienteSelecionado.cidade = txtcidade.text;
-        clienteSelecionado.bairro = txtbairro.text;
-        clienteSelecionado.rua = txtrua.text;
-        clienteSelecionado.numerocasa = txtnumerocasa.text;
-
-        // 2 passo eh chamar o metodo de alterar dados
-        int resultado = await _db.alterarCliente(clienteSelecionado);
-        if (resultado != null) {
-          print("Dados alteras com sucesso!" + resultado.toString());
-        } else {
-          print("Erro ao alterar!");
-        }
-      }
-
-      // EXIBIR O NOVO ITEM ADD APOS CLICAR NO BOTAO SALVAR
-      limparTela();
-      recuperarClientes();
-    });
+                  return Card(
+                    child: ListTile(
+                        title: Text(obj.nome),
+                        subtitle: Text("CEP: " + obj.cep),
+                        trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              GestureDetector(
+                                  onTap: () {
+                                    exibirTelaConfirma(obj.id);
+                                    print("Clicou em Delete!");
+                                  },
+                                  child: const Padding(
+                                      padding: EdgeInsets.only(right: 16),
+                                      child: Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                      ))),
+                              GestureDetector(
+                                  onTap: () {
+                                    /// PASSO O OBJETO MAS NÃO PUXA OS DADOS QUANDO CLICO EM EDITAR
+                                    exibirTelaCadastro(cliente: obj);
+                                  },
+                                  child: const Padding(
+                                      padding: EdgeInsets.only(right: 16),
+                                      child: Icon(
+                                        Icons.edit,
+                                        color: Colors.blue,
+                                      ))),
+                            ])),
+                  );
+                }),
+          )
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => Formulario()));
+          //limparTela();
+          //exibirTelaCadastro();
+        },
+      ),
+    );
   }
 
   void limparTela() {
@@ -221,129 +207,118 @@ class _HomeState extends State<Home> {
       context: context,
       builder: (context) {
         return AlertDialog(
-            insetPadding: EdgeInsets.zero,
-            title: Text("$textoTitulo"),
+          insetPadding: EdgeInsets.zero,
+          title: Text("$textoTitulo"),
 //-------------------------------------------------
 
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildName(),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  _buildPhone(),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  _buildConsultaCep(),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  _buildEndereco(),
-                  const SizedBox(
-                    height: 60,
-                  ),
-                  /////////////
-
-                  /////////
-
-                  TextButton(
-                    child: const Text("Cancelar"),
-                    style: TextButton.styleFrom(
-                      primary: Colors.red, // background
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  TextButton(
-                    child: Text("$textobotao"),
-                    onPressed: () {
-                      consultaCep();
-                      salvarCliente();
-                      Navigator.pop(context);
-                    },
-                  ),
-
-                  ///////////////
-                ],
+          content: SingleChildScrollView(
+              child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _buildName(),
+                const SizedBox(
+                  height: 10,
+                ),
+                _buildPhone(),
+                const SizedBox(
+                  height: 10,
+                ),
+                _buildConsultaCep(),
+                const SizedBox(
+                  height: 10,
+                ),
+                _buildEndereco(),
+              ],
+            ),
+          )),
+          actions: [
+            ElevatedButton(
+              child: const Text(
+                "Cancelar",
+                style: TextStyle(color: Colors.white),
               ),
-            ));
+              style: ElevatedButton.styleFrom(
+                primary: Colors.red, // background
+                //onPrimary: Colors.red, // foreground
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            ElevatedButton(
+              child: Text(
+                "$textobotao",
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.blue, // background
+                //onPrimary: Colors.red, // foreground
+              ),
+              onPressed: () {
+                salvarCliente(clienteSelecionado: cliente);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
       },
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // chama o petodo para listar clientes
-    recuperarClientes();
-  }
+//Implementando o metodo para salvar no bando de dados
+  void salvarCliente({Cliente? clienteSelecionado}) {
+    setState(() async {
+      // verifica se o clienteSelecionado eh null ou nao
+      // esta cadastrando um contato novo
+      if (clienteSelecionado == null) {
+        // passo 1 - criar um obj da classe contato para guardar as informações
+        Cliente obj = Cliente(
+            null,
+            txtnome.text,
+            txttelefone.text,
+            txtcep.text,
+            txtuf.text,
+            txtcidade.text,
+            txtbairro.text,
+            txtrua.text,
+            txtnumerocasa.text);
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Cadastro de clientes"),
-      ),
+        int resultado = await _db.inserirCliente(obj);
 
-      ///---------------------------------------------------
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: ListView.builder(
-                itemCount: listadeClientes.length,
-                itemBuilder: (context, index) {
-                  final Cliente obj = listadeClientes[index];
+        if (resultado != null) {
+          print("Cadastrado com sucesso!" + resultado.toString());
+        } else {
+          print("Erro ao cadastrar!");
+        }
+      }
+      // caso o obj clienteSelecionado esteja com dados
+      // significa que esta alterando um contato existente
+      else {
+        // 1 passo eh armazenar os dados dos campos de texto e salvar
+        // no objeto um clienteSelecionado existente
+        clienteSelecionado.nome = txtnome.text;
+        clienteSelecionado.telefone = txttelefone.text;
+        clienteSelecionado.cep = txtcep.text;
+        clienteSelecionado.uf = txtuf.text;
+        clienteSelecionado.cidade = txtcidade.text;
+        clienteSelecionado.bairro = txtbairro.text;
+        clienteSelecionado.rua = txtrua.text;
+        clienteSelecionado.numerocasa = txtnumerocasa.text;
 
-                  return Card(
-                    child: ListTile(
-                        title: Text(obj.nome),
-                        subtitle: Text("CEP: " + obj.cep),
-                        trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              GestureDetector(
-                                  onTap: () {
-                                    exibirTelaConfirma(obj.id);
-                                    print("Clicou em Delete!");
-                                  },
-                                  child: const Padding(
-                                      padding: EdgeInsets.only(right: 16),
-                                      child: Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
-                                      ))),
-                              GestureDetector(
-                                  onTap: () {
-                                    /// PASSO O OBJETO MAS NÃO PUXA OS DADOS QUANDO CLICO EM EDITAR
-                                    exibirTelaCadastro(cliente: obj);
-                                  },
-                                  child: const Padding(
-                                      padding: EdgeInsets.only(right: 16),
-                                      child: Icon(
-                                        Icons.edit,
-                                        color: Colors.blue,
-                                      ))),
-                            ])),
-                  );
-                }),
-          )
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
-        onPressed: () {
-          limparTela();
-          exibirTelaCadastro();
-        },
-      ),
-    );
+        // 2 passo eh chamar o metodo de alterar dados
+        int resultado = await _db.alterarCliente(clienteSelecionado);
+        if (resultado != null) {
+          print("Dados alteras com sucesso!" + resultado.toString());
+        } else {
+          print("Erro ao alterar!");
+        }
+      }
+
+      // EXIBIR O NOVO ITEM ADD APOS CLICAR NO BOTAO SALVAR
+      limparTela();
+      recuperarClientes();
+    });
   }
 
   Widget _buildName() {
@@ -395,7 +370,7 @@ class _HomeState extends State<Home> {
               Icons.search,
               size: 30,
             ),
-            onPressed: consultaCep,
+            onPressed: () {},
           ),
         )
       ],
@@ -478,61 +453,6 @@ class _HomeState extends State<Home> {
           ],
         )
       ],
-    );
-  }
-}
-
-/// Formata o valor do campo com a máscara ( (99) 99999-9999 ).
-///
-/// Nono dígito automático.
-class TelefoneInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    final newValueLength = newValue.text.length;
-    var selectionIndex = newValue.selection.end;
-    var substrIndex = 0;
-    final newText = StringBuffer();
-
-    if (newValueLength == 11) {
-      if (newValue.text.toString()[2] != '9') {
-        return oldValue;
-      }
-    }
-
-    /// Verifica o tamanho máximo do campo.
-    if (newValueLength > 11) {
-      return oldValue;
-    }
-    if (newValueLength >= 1) {
-      newText.write('(');
-      if (newValue.selection.end >= 1) selectionIndex++;
-    }
-
-    if (newValueLength >= 3) {
-      newText.write(newValue.text.substring(0, substrIndex = 2) + ') ');
-      if (newValue.selection.end >= 2) selectionIndex += 2;
-    }
-
-    if (newValue.text.length == 11) {
-      if (newValueLength >= 8) {
-        newText.write(newValue.text.substring(2, substrIndex = 7) + '-');
-        if (newValue.selection.end >= 7) selectionIndex++;
-      }
-    } else {
-      if (newValueLength >= 7) {
-        newText.write(newValue.text.substring(2, substrIndex = 6) + '-');
-        if (newValue.selection.end >= 6) selectionIndex++;
-      }
-    }
-
-    if (newValueLength >= substrIndex) {
-      newText.write(newValue.text.substring(substrIndex));
-    }
-
-    return TextEditingValue(
-      text: newText.toString(),
-      selection: TextSelection.collapsed(offset: selectionIndex),
     );
   }
 }
